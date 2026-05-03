@@ -1,65 +1,79 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Scanner;
 
-class pro {
-    public class student {
+class project {
+    class student {
         int student_id;
         String name;
         double grad;
-        student(String s,int n,double g){
-            name=s;
-            student_id=n;
-            grad=g;
-        }
-        void show(){
-            System.out.println("the name of student is :"+name);
-            System.out.println("the id of student is:"+student_id);
-            System.out.println("the grad of student is "+grad);
-            System.out.println("---------------------------------------------ٍ");
 
+        student(String s, int n, double g) {
+            name = s;
+            student_id = n;
+            grad = g;
         }
-        void addnew_sudent(){
-            Scanner input=new Scanner(System.in);
+
+        void show() {
+            System.out.println("the name of student is :" + name);
+            System.out.println("the id of student is:" + student_id);
+            System.out.println("the grad of student is " + grad);
+            System.out.println("---------------------------------------------");
+        }
+
+        void addnew_sudent() {
+            Scanner input = new Scanner(System.in);
             System.out.print("please enter name:");
-            name=input.nextLine();
+            name = input.nextLine();
             System.out.print("please enter id :");
-            student_id=input.nextInt();
+            student_id = Integer.parseInt(input.nextLine().trim());
             System.out.print("please enter grad of student:");
-            grad=input.nextDouble();
+            grad = Double.parseDouble(input.nextLine().trim());
 
-        }
-        void string_opertion(){
-            Scanner input=new Scanner(System.in);
-            System.out.println("Uppercase : " + name.toUpperCase());
-            System.out.println("Lowercase : " + name.toLowerCase());
-            System.out.println("Length    : " + name.length());
-            System.out.print("Enter a letter to check if name starts with it: ");
-            String letter = input.nextLine();
-            System.out.println("Starts with '" + letter + "' : " + name.startsWith(letter));
-            System.out.print("Enter a substring to check if name contains it: ");
-            String sub = input.nextLine();
-            System.out.println("Contains '" + sub + "' : " + name.contains(sub));
+            try {
+                FileWriter fw = new FileWriter("data.txt", true);
+                fw.write("\n" + name + "," + student_id + "," + grad);
+                fw.close();
+                System.out.println("Student saved to file.");
+            } catch (IOException e) {
+                System.out.println("Error saving to file: " + e.getMessage());
+            }
         }
     }
 
-    public   void main(String[] args) {
-        Scanner input=new Scanner(System.in);
-student s1=new student("amr gad",1,85.5);
-student s2=new student("omer ahmed",2,80);
-student s3=new student("ahmed gamel",3,74.5);
-student s4=new student("seed ahmed",4,77.8);
-student s5=new student("michel isek",5,90.5);
-s1.string_opertion();
-System.out.println("---------------------------------------------ٍ");
-        int result = s1.name.compareTo(s2.name);
-        if (result == 0)
-            System.out.println("Names are EQUAL.");
-        else if (result < 0)
-            System.out.println("\"" + s1.name + "\" comes BEFORE \"" + s2.name + "\" alphabetically.");
-        else
-            System.out.println("\"" + s1.name + "\" comes AFTER \"" + s2.name + "\" alphabetically.");
-        System.out.println("---------------------------------------------ٍ");
-        int id; int chosse;
-        do{
+    student[] students = new student[100];
+    int count = 0;
+
+    void loadFromFile() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("data.txt"));
+            String line;
+            while ((line = br.readLine()) != null && count < students.length) {
+                String[] parts = line.split(",");
+                if (parts.length == 3) {
+                    String name = parts[0].trim();
+                    int id = Integer.parseInt(parts[1].trim());
+                    double grad = Double.parseDouble(parts[2].trim());
+                    students[count] = new student(name, id, grad);
+                    count++;
+                }
+            }
+            br.close();
+            System.out.println("Data loaded: " + count + " students.");
+        } catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    void run() {
+        Scanner input = new Scanner(System.in);
+
+        loadFromFile();
+        int id;
+        int chosse;
+        do {
             System.out.println("===============hello=============");
             System.out.println("please choose opetaion:");
             System.out.println("1---> show all student ");
@@ -67,45 +81,48 @@ System.out.println("---------------------------------------------ٍ");
             System.out.println("3---> scerh about student by using id");
             System.out.println("4---> to exit programe");
             System.out.print("please enter your opetion:");
-            chosse=input.nextInt();
-            if (chosse==4){
+            chosse = Integer.parseInt(input.nextLine().trim());
+            if (chosse == 4) {
                 System.out.println("Exiting system... Thank you");
-                break;}
-            switch (chosse){
+                break;
+            }
+            switch (chosse) {
                 case 1:
-                    s1.show();
-                    s2.show();
-                    s3.show();
-                    s4.show();
-                    s5.show();
+                    for (int i = 0; i < count; i++) {
+                        students[i].show();
+                    }
                     break;
                 case 2:
-                    student s6=new student("",0,0.0);
-                    s6.addnew_sudent();
-                    System.out.println("---------------------------------------------ٍ");
-                    s6.show();
+                    if (count < students.length) {
+                        students[count] = new student("", 0, 0.0);
+                        students[count].addnew_sudent();
+                        System.out.println("---------------------------------------------");
+                        students[count].show();
+                        count++;
+                    } else {
+                        System.out.println("Array is full.");
+                    }
                     break;
                 case 3:
                     System.out.print("please enter id of student :");
-                    id=input.nextInt();
-                    switch (id){
-                        case 1:
-                            s1.show();
+                    id = Integer.parseInt(input.nextLine().trim());
+                    boolean found = false;
+                    for (int i = 0; i < count; i++) {
+                        if (students[i].student_id == id) {
+                            students[i].show();
+                            found = true;
                             break;
-                        case  2:
-                            s2.show();
-                            break;
-                        case  3:
-                            s3.show();
-                            break;
-                        case 4:
-                            s4.show();
-                            break;
-                        case 5:
-                            s5.show();
-                            break;
-                    }break;
+                        }
+                    }
+                    if (!found)
+                        System.out.println("Student not found.");
+                    break;
             }
-        }while (true);
+        } while (true);
+    }
+
+    public static void main(String[] args) {
+        project p = new project();
+        p.run();
     }
 }
